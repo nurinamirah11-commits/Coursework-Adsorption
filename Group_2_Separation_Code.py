@@ -12,10 +12,50 @@ import matplotlib.pyplot as plt
 from scipy import curve_fit
 
 
-################### Static measurements code ###############################
-# Part 1: Determining the appropriate isotherm model and estimating the isotherm parameters
-# Step 1: Define the isotherm models
+####################################### Static measurements code ##################################################
+# Part 1: Determining the appropriate isotherm model and estimating the isotherm parameters for Romulus adsorbent
 
+# Oxygen and Nitrogen static measurements experimental data
+pA_exp=np.array([0.0000, 8106.000, 20265.000, 247435.60, 371153.475, 494871.300, 618690.450])                                #Pa
+pB_exp=np.array([0.000, 2026.500, 3039.750, 4053.000, 6079.500, 8106.000, 61909.575, 8106.000, 61909.575,
+             111356.175, 173265.750, 247435.650, 321706.875, 395978.100, 470148.000, 544419.225, 618690.450])                #Pa
+nA_exp=np.array([0.000, 0.015, 0.035, 0.366, 0.521, 0.693, 0.815])                                                           #mol/kg
+nB_exp=np.array([0.000, 0.025, 0.038, 0.053, 0.079, 0.108, 0.562, 0.835, 1.082, 1.295, 1.482, 1.597, 1.714, 1.795, 1.861])   #mol/kg
+
+
+# Step 1: Identify the single-component isotherm as well as their parameters
+def Langmuir_single_component_isotherm(p, n_s, K):
+    n_model1_A=(n_s[0]*K[0]*p[0])/(1+K[0]*p[0])
+    n_model1_B=(n_s[1]*K[1]*p[1])/(1+K[1]*p[1])
+    return [n_model1_A, n_model1_B]
+
+def Freudlich_single_component_isotherm(p, n_s, K, m):
+    n_model2_A=(n_s[0]*K[0]*(p[0]**(1/m[0])))/(1+K[0]*(p[0]**(1/m[0])))
+    n_model2_B=(n_s[1]*K[1]*(p[1]**(1/m[1])))/(1+K[1]*(p[1]**(1/m[1])))
+    return [n_model2_A, n_model2_B]
+
+def Langmuir_Freudlich_single_component_isotherm(p, n_s, K, m):
+    n_model3_A=(n_s[0]*K[0]*(p[0]**(1/m[0])))/(1+K[0]*(p[0]**(1/m[0])))
+    n_model3_B=(n_s[1]*K[1]*(p[1]**(1/m[1])))/(1+K[1]*(p[1]**(1/m[1])))
+    return [n_model3_A, n_model3_B]
+
+
+
+# Curve fitting model1:
+parameters_guess=[1, 1]  # Initial guess for n_s and K
+popt_model1, pcov_model1 = curve_fit(Langmuir_single_component_isotherm, (pA_exp, pB_exp), (nA_exp, nB_exp), p0=parameters_guess)
+n_s_model1 = popt_model1[0:2]
+K_model1 = popt_model1[2:4]
+
+# Function to determine R^2
+def calculate_r_squared(y_exp, y_model):
+    residuals = y_exp - y_model
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((y_exp - np.mean(y_exp))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    return r_squared
+
+# Step 3: Define the isotherm models for a binary component
 def Langmuir_single_isotherm(n_s,K,p):
     n_s_A=n_s[0]
     n_s_B=n_s[1]
@@ -67,9 +107,3 @@ def Langmuir_Freudlich_isotherm(n_s,K,p,m):
     model3_B=n_B
 
     return (model3_A, model3_B)
-
-# Step 2: Inserting the experienmental data for the static measurements
-# i) Experimental data for the static measurements for Romulus adsorbent
-
-P_Romulus_A = np.array([[0.000, 8106.000, 20265.000, 247435.650, 371153.475, 494871.300, 618690.450]])
-P_Romulus_B = np.array([[0.000, 8106.000, 20265.000, 247435.650, 371153.475, 494871.300, 618690.450]])
