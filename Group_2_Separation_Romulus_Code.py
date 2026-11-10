@@ -100,7 +100,7 @@ print('R2: {0:12.6f}'.format(rsquare))
 print('RMSD: {0:12.6f}'.format(RMSD))
 
 # Parity plot for MODEL 1 fitting (Oxygen) - Experimental vs Estimated data
-plt.plot(nA_exp_Ro, y1A, marker='o', ls='none', ms=8, color='k', mfc="#F0EE87", label='Langmuir (Oxygen)')
+plt.plot(nA_exp_Ro, y1A, marker='o', ls='none', ms=8, color='k', mfc="#87F090", label='Langmuir (Oxygen)')
 
 # Curve fitting MODEL 1 (Nitrogen)
 parameters_guess=[1, 1]
@@ -119,7 +119,7 @@ print('R2: {0:12.6f}'.format(rsquare))
 print('RMSD: {0:12.6f}'.format(RMSD))
 
 # Parity plot for MODEL 1 fitting (Nitrogen) - Experimental vs Estimated data
-plt.plot(nB_exp_Ro, y1B, marker='o', ls='none', ms=8, color='k', mfc="#F1C432", label='Langmuir (Nitrogen)')
+plt.plot(nB_exp_Ro, y1B, marker='o', ls='none', ms=8, color='k', mfc="#48F132", label='Langmuir (Nitrogen)')
 
 # Curve fitting MODEL 2 (Oxygen)
 parameters_guess=[1, 1]
