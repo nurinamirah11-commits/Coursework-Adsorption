@@ -73,5 +73,3 @@ def Langmuir_Freudlich_isotherm(n_s,K,p,m):
 
 P_Romulus_A = np.array([[0.000, 8106.000, 20265.000, 247435.650, 371153.475, 494871.300, 618690.450]])
 P_Romulus_B = np.array([[0.000, 8106.000, 20265.000, 247435.650, 371153.475, 494871.300, 618690.450]])
-
-# test update github
