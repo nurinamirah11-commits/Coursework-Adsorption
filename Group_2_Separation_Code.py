@@ -1,7 +1,7 @@
 # Separation Coursework 2026/2027
 # Group 2 members:
 # Muhammad Daniel Bin Surali (Student ID: 11429231)
-# Nurin Amirah Binti Azmi (Student ID: XXXXXXXX)
+# Nurin Amirah Binti Azmi (Student ID: 14539377)
 #
 # Main objectives: 
 # Selecting the optimal adsorbent for oxygen concentrators based on the static measurements and dynamic measurements
