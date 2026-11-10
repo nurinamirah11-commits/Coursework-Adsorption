@@ -1,151 +1,123 @@
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+# Random line:
 
 
-# ==================================================
-# 1. EXPERIMENTAL DATA
-# ==================================================
+# REMUS adsorbent experimental isotherm data for Oxygen (A) and Nitrogen (B) at 303K
+pA_exp_Re=np.array([0.0000, 33200, 61300, 96100, 143200, 214800, 355900, 548200, 747900, 859000, 931700])                       #Pa
+pB_exp_Re=np.array([0.000, 63400, 88700, 117500, 162500, 208500, 303800, 427000, 609500, 776600, 919000])                       #Pa
+nA_exp_Re=np.array([0.000, 0.0372, 0.0679, 0.1022, 0.1504, 0.2138, 0.3455, 0.5089, 0.6830, 0.7679, 0.8348])                     #mol/kg
+nB_exp_Re=np.array([0.000, 0.1674, 0.2300, 0.2994, 0.3934, 0.4848, 0.6450, 0.8280, 1.0588, 1.2249, 1.3472 ])                    #mol/kg
 
-xA = np.array([1, 2, 3])
-xB = np.array([4, 5])
-xC = np.array([6, 7, 8, 9])
+#Combining experimental data into two independent set
+p_combined=(pA_exp_Ro, pB_exp_Ro, pA_exp_Re, pB_exp_Re)
+n_combined=np.concatenate((nA_exp_Ro, nB_exp_Ro, nA_exp_Re, nB_exp_Re))
 
-yA = np.array([2, 4, 6])
-yB = np.array([8, 10])
-yC = np.array([12, 14, 16, 18])
+# Another Random lines:
 
+def model1_fit(p, nsA_Ro_model1, nsB_Ro_model1, nsA_Re_model1, nsB_Re_model1, KA_Ro_model1, KB_Ro_model1, KA_Re_model1, KB_Re_model1):
+    
+    pA_exp_Ro, pB_exp_Ro, pA_exp_Re, pB_exp_Re=p
+    
+    nA_Ro_model1 = Langmuir_single_component_isotherm(pA_exp_Ro, nsA_Ro_model1, KA_Ro_model1)
+    nB_Ro_model1 = Langmuir_single_component_isotherm(pB_exp_Ro, nsB_Ro_model1, KB_Ro_model1)
+    nA_Re_model1 = Langmuir_single_component_isotherm(pA_exp_Re, nsA_Re_model1, KA_Re_model1)
+    nB_Re_model1 = Langmuir_single_component_isotherm(pB_exp_Re, nsB_Re_model1, KB_Re_model1)
 
-# ==================================================
-# 2. COMBINE THE DATASETS
-# ==================================================
-
-# Combine all x-values into one array
-x_combined = np.concatenate((xA, xB, xC))
-
-# Combine all y-values into one array
-y_combined = np.concatenate((yA, yB, yC))
-
-# Create dataset identifiers
-dataset = np.concatenate((
-    np.zeros(len(xA)),
-    np.ones(len(xB)),
-    np.full(len(xC), 2)
-))
-
-# Display combined data
-print("\n--- COMBINED EXPERIMENTAL DATA ---")
-print("Combined x-values:", x_combined)
-print("Combined y-values:", y_combined)
-print("Dataset identifiers:", dataset)
+    return np.concatenate((nA_Ro_model1, nB_Ro_model1, nA_Re_model1, nB_Re_model1))
 
 
-# ==================================================
-# 3. COMBINE X-VALUES AND DATASET IDENTIFIERS
-# ==================================================
+def model2_fit(p, nsA_Ro_model2, nsB_Ro_model2, nsA_Re_model2, nsB_Re_model2, KA_Ro_model2, KB_Ro_model2, KA_Re_model2, KB_Re_model2,mA_Ro_model2, mb_Ro_model2, mA_Re_model2, mB_Re_model2):
+    
+    pA_exp_Ro, pB_exp_Ro, pA_exp_Re, pB_exp_Re=p
+    
+    nA_Ro_model2 = Freudlich_single_component_isotherm(pA_exp_Ro, nsA_Ro_model2, KA_Ro_model2, mA_Ro_model2)
+    nB_Ro_model2 = Freudlich_single_component_isotherm(pB_exp_Ro, nsB_Ro_model2, KB_Ro_model2, mb_Ro_model2)
+    nA_Re_model2 = Freudlich_single_component_isotherm(pA_exp_Re, nsA_Re_model2, KA_Re_model2, mA_Re_model2)
+    nB_Re_model2 = Freudlich_single_component_isotherm(pB_exp_Re, nsB_Re_model2, KB_Re_model2, mB_Re_model2)
 
-# Create a 2D array
-xdata = np.vstack((x_combined, dataset))
+    return np.concatenate((nA_Ro_model2, nB_Ro_model2, nA_Re_model2, nB_Re_model2))
 
-print("\n--- XDATA ARRAY ---")
-print(xdata)
+def model3_fit(p, nsA_Ro_model3, nsB_Ro_model3, nsA_Re_model3, nsB_Re_model3, KA_Ro_model3, KB_Ro_model3, KA_Re_model3, KB_Re_model3,mA_Ro_model3, mb_Ro_model3, mA_Re_model3, mB_Re_model3):
+    
+    pA_exp_Ro, pB_exp_Ro, pA_exp_Re, pB_exp_Re=p
+    
+    nA_Ro_model3 = Langmuir_Freudlich_single_component_isotherm(pA_exp_Ro, nsA_Ro_model3, KA_Ro_model3, mA_Ro_model3)
+    nB_Ro_model3 = Langmuir_Freudlich_single_component_isotherm(pB_exp_Ro, nsB_Ro_model3, KB_Ro_model3, mb_Ro_model3)
+    nA_Re_model3 = Langmuir_Freudlich_single_component_isotherm(pA_exp_Re, nsA_Re_model3, KA_Re_model3, mA_Re_model3)
+    nB_Re_model3 = Langmuir_Freudlich_single_component_isotherm(pB_exp_Re, nsB_Re_model3, KB_Re_model3, mB_Re_model3)
 
-print("\nFirst row (x-values):", xdata[0])
-print("Second row (dataset identifiers):", xdata[1])
+    return np.concatenate((nA_Ro_model3, nB_Ro_model3, nA_Re_model3, nB_Re_model3))
 
+# Curve fitting model1_fit:
+parameters_guess=[1, 1, 1, 1, 1, 1, 1, 1]  # Initial guess for KA_Ro, KB_Ro, KA_Re, KB_Re
+popt_model1, pcov_model1 = curve_fit(model1_fit, p_combined, n_combined, p0=parameters_guess)
 
-# ==================================================
-# 4. DEFINE THE COMBINED MODEL
-# ==================================================
+# Curve fitting model2_fit:
+parameters_guess=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # Initial guess for KA_Ro, KB_Ro, KA_Re, KB_Re, mA_Ro, mb_Ro, mA_Re, mB_Re
+popt_model2, pcov_model2 = curve_fit(model2_fit, p_combined, n_combined, p0=parameters_guess)
 
-def model(xdata, mA, cA, mB, cB, mC, cC):
-
-    # Extract x-values and dataset identifiers
-    x = xdata[0]
-    group = xdata[1]
-
-    # Create an empty array for predicted y-values
-    y = np.empty(len(x))
-
-    # Dataset A: y = mA*x + cA
-    maskA = group == 0
-    y[maskA] = mA*x[maskA] + cA
-
-    # Dataset B: y = mB*x + cB
-    maskB = group == 1
-    y[maskB] = mB*x[maskB] + cB
-
-    # Dataset C: y = mC*x + cC
-    maskC = group == 2
-    y[maskC] = mC*x[maskC] + cC
-
-    return y
+# Curve fitting model3_fit:
+parameters_guess=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # Initial guess for KA_Ro, KB_Ro, KA_Re, KB_Re, mA_Ro, mb_Ro, mA_Re, mB_Re
+popt_model3, pcov_model3 = curve_fit(model3_fit, p_combined, n_combined, p0=parameters_guess)
 
 
-# ==================================================
-# 5. PERFORM CURVE FITTING
-# ==================================================
 
-# Initial parameter guesses
-p0 = [1, 1, 1, 1, 1, 1]
+# Function to determine R^2
+def calculate_r_squared(y_exp, y_model):
+    residuals = y_exp - y_model
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((y_exp - np.mean(y_exp))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    return r_squared
 
-# Optimise parameters
-popt, pcov = curve_fit(
-    model,
-    xdata,
-    y_combined,
-    p0=p0
-)
+# Step 3: Define the isotherm models for a binary component
+def Langmuir_single_isotherm(n_s,K,p):
+    n_s_A=n_s[0]
+    n_s_B=n_s[1]
+    K_A=K[0]
+    K_B=K[1]
+    p_A=p[0]
+    p_B=p[1]
 
+    n_A = (n_s_A*K_A*p_A)/(1+K_A*p_A+K_B*p_B)
+    n_B = (n_s_B*K_B*p_B)/(1+K_A*p_A+K_B*p_B)
 
-# ==================================================
-# 6. EXTRACT OPTIMISED PARAMETERS
-# ==================================================
+    model1_A=n_A
+    model1_B=n_B
 
-mA, cA, mB, cB, mC, cC = popt
+    return (model1_A, model1_B)
 
-print("\n--- OPTIMISED PARAMETERS ---")
-print(f"Dataset A: m = {mA:.4f}, c = {cA:.4f}")
-print(f"Dataset B: m = {mB:.4f}, c = {cB:.4f}")
-print(f"Dataset C: m = {mC:.4f}, c = {cC:.4f}")
+def Langmuir_dual_isotherm(n_s,K,p):
+    n_1_s_A=n_s[0]
+    n_2_s_A=n_s[1]
+    n_1_s_B=n_s[2]
+    n_2_s_B=n_s[3]
+    K_1_A=K[0]
+    K_2_A=K[1]
+    K_1_B=K[2]
+    K_2_B=K[3]
+    p_A=p[0]
+    p_B=p[1]
 
+    n_A = (n_1_s_A*K_1_A*p_A)/(1+K_1_A*p_A+K_1_B*p_B) + (n_2_s_A*K_2_A*p_A)/(1+K_2_A*p_A+K_2_B*p_B)
+    n_B=(n_1_s_B*K_1_B*p_B)/(1+K_1_A*p_A+K_1_B*p_B) + (n_2_s_B*K_2_B*p_B)/(1+K_2_A*p_A+K_2_B*p_B)
 
-# ==================================================
-# 7. GENERATE PREDICTED VALUES
-# ==================================================
+    model2_A=n_A
+    model2_B=n_B
 
-yA_fit = mA*xA + cA
-yB_fit = mB*xB + cB
-yC_fit = mC*xC + cC
+    return (model2_A, model2_B)
 
-print("\n--- PREDICTED Y-VALUES ---")
-print("Dataset A:", yA_fit)
-print("Dataset B:", yB_fit)
-print("Dataset C:", yC_fit)
+def Langmuir_Freudlich_isotherm(n_s,K,p,m):
+    n_s_A=n_s[0]
+    n_s_B=n_s[1]
+    K_A=K[0]
+    K_B=K[1]
+    p_A=p[0]
+    p_B=p[1]
 
+    n_A = (n_s_A*K_A*(p_A**(1/m)))/(1+K_A*(p_A**(1/m))+K_B*(p_B**(1/m)))
+    n_B = (n_s_B*K_B*(p_B**(1/m)))/(1+K_A*(p_A**(1/m))+K_B*(p_B**(1/m)))
 
-# ==================================================
-# 8. PLOT EXPERIMENTAL DATA AND FITTED MODELS
-# ==================================================
+    model3_A=n_A
+    model3_B=n_B
 
-plt.figure(figsize=(9, 6))
-
-# Experimental data
-plt.scatter(xA, yA, label="Dataset A experimental")
-plt.scatter(xB, yB, label="Dataset B experimental")
-plt.scatter(xC, yC, label="Dataset C experimental")
-
-# Fitted models
-plt.plot(xA, yA_fit, label="Dataset A fitted")
-plt.plot(xB, yB_fit, label="Dataset B fitted")
-plt.plot(xC, yC_fit, label="Dataset C fitted")
-
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("Simultaneous Curve Fitting of Three Datasets")
-
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+    return (model3_A, model3_B)
