@@ -35,7 +35,7 @@ def langmuir_freundlich_single_isotherm(p, ns, K, m):
     return (ns * K * (p ** (1.0/m))) / (1.0 + K * (p ** (1.0/m)))
 
 # Step 3 : Fit the Experimental Data to the Isotherm Models for Remus Adsorbent
-# Initial guess for parameters : q_sat is the value a bit higher than experimental data, K usually small value (1e-6) in Pa-1, m usually greater than 1
+# Initial guess for parameters : q_sat is the value a bit higher than experimental data, K usually small value (1e-1) in bar-1, m usually greater than 1
 # Langmuir model fit
 
 popt_A_Langmuir, pcov_A_Langmuir = curve_fit(langmuir_single_isotherm, pA_exp_Re, nA_exp_Re, p0=[2.0, 1e-6]) # p0=(ns, K)
@@ -48,8 +48,8 @@ popt_B_Freundlich, pcov_B_Freundlich = curve_fit(freundlich_single_isotherm, pB_
 
 # Langmuir-Freundlich model fit
 
-popt_A_Langmuir_Freundlich, pcov_A_Langmuir_Freundlich = curve_fit(langmuir_freundlich_single_isotherm, pA_exp_Re, nA_exp_Re, p0=[2.0, 1e-6, 1.0], bounds=([0, 0, 0], [5.0, 1.0, 5.0]), maxfev=10000)
-popt_B_Langmuir_Freundlich, pcov_B_Langmuir_Freundlich = curve_fit(langmuir_freundlich_single_isotherm, pB_exp_Re, nB_exp_Re, p0=[3.0, 1e-6, 1.0], bounds=([0, 0, 0], [5.0, 1.0, 5.0]), maxfev=10000) 
+popt_A_Langmuir_Freundlich, pcov_A_Langmuir_Freundlich = curve_fit(langmuir_freundlich_single_isotherm, pA_exp_Re, nA_exp_Re, p0=[2.0, 1e-6, 1.0], maxfev=10000)
+popt_B_Langmuir_Freundlich, pcov_B_Langmuir_Freundlich = curve_fit(langmuir_freundlich_single_isotherm, pB_exp_Re, nB_exp_Re, p0=[3.0, 1e-6, 1.0], maxfev=10000) 
 
 # Step 4 : Evaluate R-squared for each model fit
 def calculate_r_squared(y_exp, y_model):
