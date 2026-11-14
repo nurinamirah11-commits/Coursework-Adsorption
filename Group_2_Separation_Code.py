@@ -111,28 +111,53 @@ print(f"Langmuir-Freundlich : {r_squared_A_langmuir_freundlich:.4f} (O2), {r_squ
 print("\n--- Model Comparison: RMSD (mol/kg) ---")
 print(f"Langmuir Model RMSD            : {RMSD_A_langmuir:.4f} mol/kg (O2), {RMSD_B_langmuir:.4f} mol/kg (N2)")
 print(f"Freundlich Model RMSD          : {RMSD_A_freundlich:.4f} mol/kg (O2), {RMSD_B_freundlich:.4f} mol/kg (N2)")
-print(f"Langmuir-Freundlich (Sips) RMSD: {RMSD_A_langmuir_freundlich:.4f} mol/kg (O2), {RMSD_B_langmuir_freundlich:.4f} mol/kg (N2)")
+print(f"Langmuir-Freundlich RMSD: {RMSD_A_langmuir_freundlich:.4f} mol/kg (O2), {RMSD_B_langmuir_freundlich:.4f} mol/kg (N2)")
 
-# Parity plot - Experimental vs Estimated data
-# Langmuir model parity plot
-plt.plot(nA_exp_Re, n_model_A_langmuir, marker='o', ls='none', ms=8, color='k', mfc="#87F090", label='Langmuir (Oxygen)')
-plt.plot(nB_exp_Re, n_model_B_langmuir, marker='s', ls='none', ms=8, color='k', mfc="#48F132", label='Langmuir (Nitrogen)')
+# Plotting results (O2 isotherms, N2 isotherms and parity plot)
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 5))
 
-# Freundlich model parity plot
-plt.plot(nA_exp_Re, n_model_A_freundlich, marker='o', ls='none', ms=8, color='k', mfc="#87C6F0", label='Freundlich (Oxygen)')
-plt.plot(nB_exp_Re, n_model_B_freundlich, marker='s', ls='none', ms=8, color='k', mfc="#279FF0", label='Freundlich (Nitrogen)') 
+p_smooth_A = np.linspace(0, max(pA_exp_Re), 200)
+p_smooth_B = np.linspace(0, max(pB_exp_Re), 200)
 
-# Langmuir-Freundlich model parity plot
-plt.plot(nA_exp_Re, n_model_A_langmuir_freundlich, marker='o', ls='none', ms=8, color='k', mfc="#EC7F7F", label='Langmuir-Freundlich (Oxygen)')
-plt.plot(nB_exp_Re, n_model_B_langmuir_freundlich, marker='s', ls='none', ms=8, color='k', mfc="#EC1919", label='Langmuir-Freundlich (Nitrogen)')
+# --- Oxygen Isotherms ---
+ax1.plot(pA_exp_Re, nA_exp_Re, 'ko', label='Experimental (O2)', markersize=5)
+ax1.plot(p_smooth_A, langmuir_single_isotherm(p_smooth_A, *popt_A_Langmuir), 'r-', label='Langmuir', lw=2)
+ax1.plot(p_smooth_A, freundlich_single_isotherm(p_smooth_A, *popt_A_Freundlich), 'g--', label='Freundlich', lw=2)
+ax1.plot(p_smooth_A, langmuir_freundlich_single_isotherm(p_smooth_A, *popt_A_Langmuir_Freundlich), 'b-.', label='Langmuir-Freundlich', lw=2)
+ax1.set_xlabel('Pressure [bar]', fontsize=11)
+ax1.set_ylabel('Adsorption quantity [mol/kg]', fontsize=11)
+ax1.set_title('Oxygen Isotherms', fontsize=12)
+ax1.legend(fontsize=9)
+ax1.grid(True, linestyle=':', alpha=0.6)
 
-# Show plot
-plt.plot([0, 2.1], [0, 2.1], 'k--', lw=0.5)  # Plot diagonal
-plt.xlim([0, 2.1])
-plt.ylim([0, 2.1])
-plt.xlabel(r'$n \quad {\rm (Experimental)}$', size=16)
-plt.ylabel(r'$n \quad {\rm (Predicted)}$', size=16)
-plt.legend(fontsize=10)
-plt.savefig('fitting_rate.pdf', bbox_inches='tight')
-plt.grid(color='0.8', linestyle='-', linewidth=1)
+# --- Nitrogen Isotherms ---
+ax2.plot(pB_exp_Re, nB_exp_Re, 'ko', label='Experimental (N2)', markersize=5)
+ax2.plot(p_smooth_B, langmuir_single_isotherm(p_smooth_B, *popt_B_Langmuir), 'r-', label='Langmuir', lw=2)
+ax2.plot(p_smooth_B, freundlich_single_isotherm(p_smooth_B, *popt_B_Freundlich), 'g--', label='Freundlich', lw=2)
+ax2.plot(p_smooth_B, langmuir_freundlich_single_isotherm(p_smooth_B, *popt_B_Langmuir_Freundlich), 'b-.', label='Langmuir-Freundlich', lw=2)
+ax2.set_xlabel('Pressure [bar]', fontsize=11)
+ax2.set_ylabel('Adsorption quantity [mol/kg]', fontsize=11)
+ax2.set_title('Nitrogen Isotherms', fontsize=12)
+ax2.legend(fontsize=9)
+ax2.grid(True, linestyle=':', alpha=0.6)
+
+# --- Parity Plot (Experimental vs Estimated with Model) ---
+ax3.plot(nA_exp_Re, n_model_A_langmuir, marker='o', ls='none', ms=6, color='k', mfc="#87F090", label='Langmuir (O2)')
+ax3.plot(nB_exp_Re, n_model_B_langmuir, marker='s', ls='none', ms=6, color='k', mfc="#48F132", label='Langmuir (N2)')
+ax3.plot(nA_exp_Re, n_model_A_freundlich, marker='o', ls='none', ms=6, color='k', mfc="#87C6F0", label='Freundlich (O2)')
+ax3.plot(nB_exp_Re, n_model_B_freundlich, marker='s', ls='none', ms=6, color='k', mfc="#279FF0", label='Freundlich (N2)') 
+ax3.plot(nA_exp_Re, n_model_A_langmuir_freundlich, marker='o', ls='none', ms=6, color='k', mfc="#EC7F7F", label='Langmuir-Freundlich (O2)')
+ax3.plot(nB_exp_Re, n_model_B_langmuir_freundlich, marker='s', ls='none', ms=6, color='k', mfc="#EC1919", label='Langmuir-Freundlich (N2)')
+
+ax3.plot([0, 2.1], [0, 2.1], 'k--', lw=1)  # Diagonal parity line (y = x)
+ax3.set_xlim([0, 2.1])
+ax3.set_ylim([0, 2.1])
+ax3.set_xlabel('Experimental Adsorption Quantity (mol/kg)', fontsize=11)
+ax3.set_ylabel('Predicted Adsorption Quantity (mol/kg)', fontsize=11)
+ax3.set_title('Parity Plot', fontsize=12)
+ax3.legend(fontsize=8, loc='upper left')
+ax3.grid(True, linestyle=':', alpha=0.6)
+
+plt.tight_layout()
+plt.savefig('remus_adsorption_complete_analysis.pdf', bbox_inches='tight')
 plt.show()
