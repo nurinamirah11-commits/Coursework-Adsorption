@@ -109,8 +109,8 @@ print(f"Langmuir-Freundlich : {r_squared_A_langmuir_freundlich:.4f} (O2), {r_squ
 
 # RMSD Comparison (Error Magnitude)
 print("\n--- Model Comparison: RMSD (mol/kg) ---")
-print(f"Langmuir Model        : {RMSD_A_langmuir:.4f} mol/kg (O2), {RMSD_B_langmuir:.4f} mol/kg (N2)")
-print(f"Freundlich Model      : {RMSD_A_freundlich:.4f} mol/kg (O2), {RMSD_B_freundlich:.4f} mol/kg (N2)")
+print(f"Langmuir Model       : {RMSD_A_langmuir:.4f} mol/kg (O2), {RMSD_B_langmuir:.4f} mol/kg (N2)")
+print(f"Freundlich Model     : {RMSD_A_freundlich:.4f} mol/kg (O2), {RMSD_B_freundlich:.4f} mol/kg (N2)")
 print(f"Langmuir-Freundlich  : {RMSD_A_langmuir_freundlich:.4f} mol/kg (O2), {RMSD_B_langmuir_freundlich:.4f} mol/kg (N2)")
 
 # Plotting results (O2 isotherms, N2 isotherms and parity plot)
