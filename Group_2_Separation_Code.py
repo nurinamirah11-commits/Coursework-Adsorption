@@ -11,8 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-print("=== REMUS ADSORBENT : STATIC MEASUREMENTS ===")
-
 # Experimental Data for Remus Adsorbent at 303K
 # Oxygen (A) and Nitrogen (B)
 
@@ -36,9 +34,7 @@ def freundlich_single_isotherm(p, K, m):
 
 # Model 3 : Langmuir-Freundlich Single Isotherm Model    
 def langmuir_freundlich_single_isotherm(p, ns, K, m):
-    # Prevents zero-pressure math errors when curve_fit tests extreme parameters (because data starts from p = 0)
-    p_safe = np.maximum(p, 1e-9) 
-    return (ns * K * (p_safe ** (1.0/m))) / (1.0 + K * (p_safe ** (1.0/m)))
+    return (ns * K * (p ** (1.0/m))) / (1.0 + K * (p ** (1.0/m)))
 
 # Fit the Experimental Data to the Isotherm Models for Remus Adsorbent
 # Initial guess for parameters : q_sat is the value a bit higher than experimental data, K usually small value (1e-1) in bar-1, m usually greater than 1
@@ -89,6 +85,8 @@ r_squared_B_freundlich, RMSD_B_freundlich = fitting_accuracy(nB_exp_Re, n_model_
 r_squared_B_langmuir_freundlich, RMSD_B_langmuir_freundlich = fitting_accuracy(nB_exp_Re, n_model_B_langmuir_freundlich)
 
 # Print the fitted parameters and R-squared values (+RMSD)for each model
+print("=== REMUS ADSORBENT : STATIC MEASUREMENTS ===")
+
 print("\n--- Langmuir Model Parameters ---")
 print(f"Oxygen (A) -> ns: {popt_A_Langmuir[0]:.4f} mol/kg, K: {popt_A_Langmuir[1]:.4e} bar-1")
 print(f"Nitrogen (B) -> ns: {popt_B_Langmuir[0]:.4f} mol/kg, K: {popt_B_Langmuir[1]:.4e} bar-1")
@@ -103,9 +101,9 @@ print(f"Nitrogen (B) -> ns: {popt_B_Langmuir_Freundlich[0]:.4f} mol/kg, K: {popt
 
 # R-Squared Comparison (Goodness of Fit)
 print("\n--- Model Comparison: R2 ---")
-print(f"Langmuir Model      : {r_squared_A_langmuir:.4f} (O2), {r_squared_B_langmuir:.4f} (N2)")
-print(f"Freundlich Model    : {r_squared_A_freundlich:.4f} (O2), {r_squared_B_freundlich:.4f} (N2)")
-print(f"Langmuir-Freundlich : {r_squared_A_langmuir_freundlich:.4f} (O2), {r_squared_B_langmuir_freundlich:.4f} (N2)")
+print(f"Langmuir Model      : {r_squared_A_langmuir:.5f} (O2), {r_squared_B_langmuir:.4f} (N2)")
+print(f"Freundlich Model    : {r_squared_A_freundlich:.5f} (O2), {r_squared_B_freundlich:.4f} (N2)")
+print(f"Langmuir-Freundlich : {r_squared_A_langmuir_freundlich:.5f} (O2), {r_squared_B_langmuir_freundlich:.4f} (N2)")
 
 # RMSD Comparison (Error Magnitude)
 print("\n--- Model Comparison: RMSD (mol/kg) ---")
