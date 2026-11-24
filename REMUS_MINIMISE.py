@@ -9,7 +9,7 @@
 # Library required for the codes
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+from scipy.optimize import minimize
 
 # Experimental Data for Remus Adsorbent at 303K
 # Oxygen (A) and Nitrogen (B)
@@ -30,28 +30,35 @@ def langmuir_single_isotherm(p, ns, K):
 
 # Model 2 : Freundlich Single Isotherm Model
 def freundlich_single_isotherm(p, K, m):
-    return K * (p ** (1.0/m))
+    p_safe = np.maximum(p, 1e-9)   # avoids problems at p = 0 because without this, the output gives WARNING
+    return K * (p_safe ** (1.0/m))
 
 # Model 3 : Langmuir-Freundlich Single Isotherm Model    
 def langmuir_freundlich_single_isotherm(p, ns, K, m):
-    return (ns * K * (p ** (1.0/m))) / (1.0 + K * (p ** (1.0/m)))
+    p_safe = np.maximum(p, 1e-9)   # avoids problems at p = 0 because without this, the output gives WARNING
+    return (ns * K * (p_safe ** (1.0/m))) / (1.0 + K * (p_safe ** (1.0/m)))
+
+# function to help minimize sum of squared errors for all model (instead of using curve-fit, use minimize)
+def fit_model(model_func, p_exp, n_exp, p0):
+    def sse(params):
+        n_pred = model_func(p_exp, *params)
+        return np.sum((n_exp - n_pred) ** 2)
+
+    res = minimize(sse, p0)
+    return res.x
 
 # Fit the Experimental Data to the Isotherm Models for Remus Adsorbent
-# Initial guess for parameters : q_sat is the value a bit higher than experimental data, K usually small value (1e-1) in bar-1, m usually greater than 1
 # Langmuir model fit
-
-popt_A_Langmuir, pcov_A_Langmuir = curve_fit(langmuir_single_isotherm, pA_exp_Re, nA_exp_Re, p0=[2.0, 1]) # p0=(ns, K)
-popt_B_Langmuir, pcov_B_Langmuir = curve_fit(langmuir_single_isotherm, pB_exp_Re, nB_exp_Re, p0=[3.0, 1]) # p0=(ns, K)
+popt_A_Langmuir = fit_model(langmuir_single_isotherm, pA_exp_Re, nA_exp_Re, [2.0, 1.0])
+popt_B_Langmuir = fit_model(langmuir_single_isotherm, pB_exp_Re, nB_exp_Re, [3.0, 1.0])
 
 # Freundlich model fit
-
-popt_A_Freundlich, pcov_A_Freundlich = curve_fit(freundlich_single_isotherm, pA_exp_Re, nA_exp_Re, p0=[1.0, 1.0]) # p0=(K, m)
-popt_B_Freundlich, pcov_B_Freundlich = curve_fit(freundlich_single_isotherm, pB_exp_Re, nB_exp_Re, p0=[1.0, 1.0]) # p0=(K, m)
+popt_A_Freundlich = fit_model(freundlich_single_isotherm, pA_exp_Re, nA_exp_Re, [1.0, 1.0])
+popt_B_Freundlich = fit_model(freundlich_single_isotherm, pB_exp_Re, nB_exp_Re, [1.0, 1.0])
 
 # Langmuir-Freundlich model fit
-
-popt_A_Langmuir_Freundlich, pcov_A_Langmuir_Freundlich = curve_fit(langmuir_freundlich_single_isotherm, pA_exp_Re, nA_exp_Re, p0=[2.0, 1.0, 1.0], maxfev=10000)
-popt_B_Langmuir_Freundlich, pcov_B_Langmuir_Freundlich = curve_fit(langmuir_freundlich_single_isotherm, pB_exp_Re, nB_exp_Re, p0=[3.0, 1.0, 1.0], maxfev=10000) 
+popt_A_Langmuir_Freundlich = fit_model(langmuir_freundlich_single_isotherm, pA_exp_Re, nA_exp_Re, [2.0, 1.0, 1.0])
+popt_B_Langmuir_Freundlich = fit_model(langmuir_freundlich_single_isotherm, pB_exp_Re, nB_exp_Re, [3.0, 1.0, 1.0])
 
 # Metrics used to determine the fitting accuracy between all models:
 def fitting_accuracy(n_exp, n_model):
@@ -64,7 +71,7 @@ def fitting_accuracy(n_exp, n_model):
     return (r_squared, RMSD)
 
 # Calculate the adsorption quantities predicted by each model
-n_model_A_langmuir =  langmuir_single_isotherm(pA_exp_Re, *popt_A_Langmuir)
+n_model_A_langmuir = langmuir_single_isotherm(pA_exp_Re, *popt_A_Langmuir)
 n_model_B_langmuir = langmuir_single_isotherm(pB_exp_Re, *popt_B_Langmuir)
 
 n_model_A_freundlich = freundlich_single_isotherm(pA_exp_Re, *popt_A_Freundlich)
@@ -157,5 +164,5 @@ ax3.legend(fontsize=8, loc='upper left')
 ax3.grid(True, linestyle=':', alpha=0.6)
 
 plt.tight_layout()
-plt.savefig('remus_adsorption_complete_analysis.pdf', bbox_inches='tight')
+plt.savefig('remus_adsorption_minimize_function.pdf', bbox_inches='tight')
 plt.show()
