@@ -146,6 +146,18 @@ print(f"Dual-Site Langmuir Model  : {RMSD_A_DSL:.4f} mol/kg (O2), {RMSD_B_DSL:.4
 error_A_Re = np.sqrt(np.diag(pcov_A_Langmuir))   # [error in ns, error in K] for O2
 error_B_Re = np.sqrt(np.diag(pcov_B_Langmuir))   # [error in ns, error in K] for N2
 
+# error in langmuir freundlich
+error_A_Re_2 = np.sqrt(np.diag(pcov_A_Langmuir_Freundlich))   # [error in ns, error in K] for O2
+error_B_Re_2 = np.sqrt(np.diag(pcov_B_Langmuir_Freundlich))   # [error in ns, error in K] for N2
+print({error_A_Re_2[0]})
+print({error_B_Re_2[0]})
+
+# error in freundlich
+error_A_Re_3 = np.sqrt(np.diag(pcov_A_Freundlich))   # [error in ns, error in K] for O2
+error_B_Re_3 = np.sqrt(np.diag(pcov_B_Freundlich))   # [error in ns, error in K] for N2
+print({error_A_Re_3[0]})
+print({error_B_Re_3[0]})
+
 # Store directly the parameters determined in variables to be used in Part 2
 ns_A_Re, K_A_Re = popt_A_Langmuir
 ns_B_Re, K_B_Re = popt_B_Langmuir

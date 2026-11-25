@@ -60,6 +60,7 @@ adsorbent_parameters = {
 # Equations of multi-component (now, we're considering a realistic mixture loading of O2 and N2)
 # Calculate the mixture equilibrium loadings q_O2* and q_N2* for LDF later
 # Extended Langmuir-Freundlich isotherm for both adsorbents even though Remus follows Langmuir (with m=1, Langmuir Freundlich reduces to Langmuir)
+# Reminder : as the values for K are in bar-1, the pressure here is in bar too
 def multicomponent_Langmuir_Freundlich(P_A, P_B, a):
     # to avoid problems P approaching zero (NaN)
     P_A = np.maximum(P_A, 1e-12)
@@ -84,10 +85,13 @@ def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 
     delta_z = L / Nz # small length for discretization
 
     # Initial condition: column saturated with pure O2 (A) : y_B = 0, y_A = 1
-    # Inlet feed: air rich with N2 (B), consider pure N2? : y_B_feed = 1, y_A_feed = 0 (at first we need to desorb the O2 in the column)
     y_B_0 = np.zeros(Nz)
-    P_A_0 = np.ones(Nz) * P_bar
+
+    # P_i = y_i * Ptotal
+    P_A_0 = np.ones(Nz) * P_bar   
     P_B_0 = np.zeros(Nz) * P_bar
+
+    # Calculate initial values for qA and qB using isotherm
     q_A_0, q_B_0 = multicomponent_Langmuir_Freundlich(P_A_0, P_B_0, a)
     state0 = np.concatenate([y_B_0, q_A_0, q_B_0])
 
@@ -97,14 +101,19 @@ def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 
         q_A = state[Nz : 2 * Nz]
         q_B = state[2 * Nz : 3 * Nz]
 
-        # Convert mole fractions to partial pressures in bar for the isotherm
+        # Calculate adsorption capacity equilibrium using multicomponent isotherm
+        # Don't forget to use partial pressure in the bracket as we define in function isotherm
+        # P_i = y_i * Ptotal
         q_A_eq, q_B_eq = multicomponent_Langmuir_Freundlich(y_A * P_bar, y_B * P_bar, a)
 
-        # LDF mass transfer rates
+        # LDF mass transfer rates (equation 5)
         dqA_dt = k_i * (q_A_eq - q_A)
         dqB_dt = k_i * (q_B_eq - q_B)
 
         # Interstitial velocity profile along cell faces
+        # Velocity is a variable that changes as gas moves from left to right because molecules are adsorbed/desorbed in the 'small box/tranche'.
+        # meaning that velocity into the small volume is different with velocity going out the small volume
+        # so we need Nz+1 values of v (Nz+1 faces) ; more details in Amirah's goodnotes
         v_faces = np.zeros(Nz + 1)
         v_faces[0] = v_in
         dv_dz = -ads * (dqA_dt + dqB_dt)
@@ -136,7 +145,6 @@ def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 
     t_bt_5pct = sol.t[hit_5pct[0]] if len(hit_5pct) > 0 else np.nan
 
     return sol.t, y_B_out, y_A_out, t_stoich_eq, t_bt_5pct
-
 
 # Run breakthrough simulations for both adsorbents
 t_Ro, yB_Ro, yA_Ro, teq_Ro, t5_Ro = run_breakthrough_sim("Romulus", t_end=1100.0)
