@@ -142,32 +142,16 @@ print(f"Langmuir-Freundlich Model : {RMSD_A_langmuir_freundlich:.4f} mol/kg (O2)
 print(f"Dual-Site Langmuir Model  : {RMSD_A_DSL:.4f} mol/kg (O2), {RMSD_B_DSL:.4f} mol/kg (N2)")
 
 # Best model for Remus: Langmuir (2 parameters, R2 > 0.999 for both gases, saturates, extends to competitive form)
-# Standard errors = square root of the diagonal of the covariance matrix : to evaluate how well ns and K are determined by the data
-error_A_Re = np.sqrt(np.diag(pcov_A_Langmuir))   # [error in ns, error in K] for O2
-error_B_Re = np.sqrt(np.diag(pcov_B_Langmuir))   # [error in ns, error in K] for N2
-
-# error in langmuir freundlich
-error_A_Re_2 = np.sqrt(np.diag(pcov_A_Langmuir_Freundlich))   # [error in ns, error in K] for O2
-error_B_Re_2 = np.sqrt(np.diag(pcov_B_Langmuir_Freundlich))   # [error in ns, error in K] for N2
-print({error_A_Re_2[0]})
-print({error_B_Re_2[0]})
-
-# error in freundlich
-error_A_Re_3 = np.sqrt(np.diag(pcov_A_Freundlich))   # [error in ns, error in K] for O2
-error_B_Re_3 = np.sqrt(np.diag(pcov_B_Freundlich))   # [error in ns, error in K] for N2
-print({error_A_Re_3[0]})
-print({error_B_Re_3[0]})
-
 # Store directly the parameters determined in variables to be used in Part 2
 ns_A_Re, K_A_Re = popt_A_Langmuir
 ns_B_Re, K_B_Re = popt_B_Langmuir
 
 print("\n====== BEST MODEL FOR REMUS: LANGMUIR ======")
 print("Parameters value +/- standard error:")
-print(f"Oxygen (A)   -> ns = {ns_A_Re:.3f} +/- {error_A_Re[0]:.3f} mol/kg ({100*error_A_Re[0]/ns_A_Re:.1f}%), "
-      f"K = {K_A_Re:.4f} +/- {error_A_Re[1]:.4f} bar-1 ({100*error_A_Re[1]/K_A_Re:.1f}%)")
-print(f"Nitrogen (B) -> ns = {ns_B_Re:.3f} +/- {error_B_Re[0]:.3f} mol/kg ({100*error_B_Re[0]/ns_B_Re:.1f}%), "
-      f"K = {K_B_Re:.4f} +/- {error_B_Re[1]:.4f} bar-1 ({100*error_B_Re[1]/K_B_Re:.1f}%)")
+print(f"Oxygen (A)   -> ns = {ns_A_Re:.3f} mol/kg, "
+      f"K = {K_A_Re:.4f} bar-1")
+print(f"Nitrogen (B) -> ns = {ns_B_Re:.3f} mol/kg, "
+      f"K = {K_B_Re:.4f} bar-1")
 
 # Evaluate the static performance of an adsorbent using its Langmuir parameters (can be used for Romulus too)
 def evaluate_adsorbent(adsorbent, ns_A, K_A, ns_B, K_B, P_process = 1.0):

@@ -77,7 +77,6 @@ def multicomponent_Langmuir_Freundlich(P_A, P_B, a):
 
 # From PDF, list of equations :
 # (1) : dy/dt = D_L * d2y/dz2 - d(y*v)/dz - ads * dq/dt // gas balance for N2
-# (5) : dq_i/dt = k_i * (q_i_eq - q_i) // LDF, solid balance
 
 # function for breakthrough time (method of lines ; discretization)
 def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 250):
@@ -114,16 +113,17 @@ def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 
         # Velocity is a variable that changes as gas moves from left to right because molecules are adsorbed/desorbed in the 'small box/tranche'.
         # meaning that velocity into the small volume is different with velocity going out the small volume
         # so we need Nz+1 values of v (Nz+1 faces) ; more details in Amirah's goodnotes
-        v_faces = np.zeros(Nz + 1)
-        v_faces[0] = v_in
-        dv_dz = -ads * (dqA_dt + dqB_dt)
-        v_faces[1:] = v_in + np.cumsum(dv_dz) * delta_z
+        v_faces = np.zeros(Nz + 1)                      
+        v_faces[0] = v_in                               # the first value of v is inlet velocity (INTERSTITIAL)
+        dv_dz = -ads * (dqA_dt + dqB_dt)                # equation of evolution of velocity in space by summing 2 equations (1) for O2 and N2
+        v_faces[1:] = v_in + np.cumsum(dv_dz) * delta_z # cumsum : cumulative sum
 
-        # Molar flux of N2 (component B) across cell faces
+        # Molar flux, J of N2 (B) across cell faces : dispersion + convection terms
+        # same reason as velocity ; why we need Nz+1 and not just Nz
         flux_B = np.zeros(Nz + 1)
-        flux_B[0] = v_in * 1.0
-        flux_B[1:Nz] = v_faces[1:Nz] * y_B[:-1] - D_L * (y_B[1:] - y_B[:-1]) / delta_z
-        flux_B[Nz] = v_faces[Nz] * y_B[-1]
+        flux_B[0] = v_in * 1.0             # with BC z=0 and we assume y_B_feed = 1 (pure N2) because we want to desorb a column concentrated with O2?
+        flux_B[1:Nz] = v_faces[1:Nz] * y_B[:-1] - D_L * (y_B[1:] - y_B[:-1]) / delta_z # equation of convective + dispersion term // v_faces[1:Nz] means point with index 1 and stop before index Nz (meaning second last point)
+        flux_B[Nz] = v_faces[Nz] * y_B[-1] # with BC z=L and the last point of yB 
 
         dyB_dt = -(flux_B[1:] - flux_B[:-1]) / delta_z - ads * dqB_dt
         return np.concatenate([dyB_dt, dqA_dt, dqB_dt])
