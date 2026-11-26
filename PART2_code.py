@@ -129,29 +129,37 @@ def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 
         return np.concatenate([dyB_dt, dqA_dt, dqB_dt])
 
     t_eval = np.linspace(0.0, t_end, n_time)
-    sol = solve_ivp(
-        ode_rhs, (0.0, t_end), state0, method="BDF", t_eval=t_eval, rtol=1e-4, atol=1e-6
-    )
+    sol = solve_ivp(ode_rhs, (0.0, t_end), state0, method="BDF", t_eval=t_eval, rtol=1e-4, atol=1e-6)
 
-    y_B_out = np.clip(sol.y[Nz - 1, :], 0.0, 1.0)
+    # to extract the composition of B and A at outlet/final column box (index 49 : Nz-1) and at all time step (:)
+    # y_B is at index 49 because we defined earlier that y_B will be in Nz from 0 to 49
+    y_B_out = np.clip(sol.y[Nz - 1, :], 0.0, 1.0) # clip to put range for y between 0 to 1 (avoid problem y exceeds 1)
     y_A_out = 1.0 - y_B_out
 
+    # Equilibrium theory for favorable isotherm like Langmuir (applicable to LF too? because the difference is just with parameter m that's approaching 1?)
     # Ideal stoichiometric (equilibrium shock) time for pure N2 feed
-    _, q_B_feed_eq = multicomponent_Langmuir_Freundlich(0.0, P_bar, a)
-    t_stoich_eq = (L / v_in) * (1.0 + ads * q_B_feed_eq)
+    q_A_feed_eq, q_B_feed_eq = multicomponent_Langmuir_Freundlich(0.0, P_bar, a) # again, assuming in feed stream, we have pure N2 and no O2, so P_A = 0 and P_B = P
+    t_b_eq = (L / v_in) * (1.0 + ads * q_B_feed_eq)
 
-    # Breakthrough time when outlet N2 reaches 5% (0.05)
-    hit_5pct = np.where(y_B_out >= 0.05)[0]
-    t_bt_5pct = sol.t[hit_5pct[0]] if len(hit_5pct) > 0 else np.nan
+    # Breakthrough time when outlet N2 reaches 5% (0.05) because usually in industry, we must stop the adsorption step once purity of O2 drops to 95%
+    # so we need to regenrate the bed to again restart the adsorption to get high purity O2
+    # in equilibrium theory, axial dispersion and instantaneous mass transfer are negligible so we'll get a vertical shock but in real dynamic model,
+    # these 2 effects need to be considered
+    hit_5percent = np.where(y_B_out >= 0.05)[0]                                  # find the array when condition yB>=0.05 is true and [0] is to unpack actual list of time-step indices
+    t_b_5percent = sol.t[hit_5percent[0]] if len(hit_5percent) > 0 else np.nan   # extract the value of time when N2 first reach 0.05 at outlet but to be safe, we put if else, with 'else np.nan' : meaning
+    # that if there's nothing in hit_5percent, N2 havent reached 5% yet throughout our simulation (need longer time), so it will return NaN instead of cause problem later
 
-    return sol.t, y_B_out, y_A_out, t_stoich_eq, t_bt_5pct
+    return sol.t, y_B_out, y_A_out, t_b_eq, t_b_5percent
 
 # Run breakthrough simulations for both adsorbents
 t_Ro, yB_Ro, yA_Ro, teq_Ro, t5_Ro = run_breakthrough_sim("Romulus", t_end=1100.0)
-print(f"Romulus -> 5% N2 breakthrough: {t5_Ro:.1f} s | Equilibrium shock time: {teq_Ro:.1f} s")
-
 t_Re, yB_Re, yA_Re, teq_Re, t5_Re = run_breakthrough_sim("Remus", t_end=1100.0)
-print(f"Remus   -> 5% N2 breakthrough: {t5_Re:.1f} s | Equilibrium shock time: {teq_Re:.1f} s")
+
+# Print breakthrough time using equilibrium theory and 5% N2 at outlet
+print("Variable\tRemus\t\tRomulus")
+print("-----------------------------------------------")
+print(f"Equilibrium time\t{teq_Re:.1f} s\t\t{teq_Ro:.1f} s")
+print(f"5% N2 breakthrough\t{t5_Re:.1f} s\t\t{t5_Ro:.1f} s")
 
 # Plot breakthrough curves
 plt.figure(figsize=(7, 4.5))
