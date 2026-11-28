@@ -214,3 +214,40 @@ plt.savefig("breakthrough_results.png", dpi=250, bbox_inches="tight")
 plt.show()
 
 # Plot sensitivity analysis (different u and different L)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
+
+# Subplot 1: Effect of superficial velocity u_in
+u_labels = [f"0.5 u_in ({0.5*u_in:.2e} m/s)", f"1.0 u_in ({u_in:.2e} m/s)", f"2.0 u_in ({2.0*u_in:.2e} m/s)"]
+u_colors = ["tab:green", "tab:blue", "tab:orange"]
+
+for u_val, lbl, col in zip(u_cases, u_labels, u_colors):
+    t_u, yB_u, _, _, t5_u = u_results[u_val]
+    ax1.plot(t_u, yB_u, color=col, lw=2, label=f"{lbl} (t5% = {t5_u:.1f} s)")
+
+ax1.axhline(0.05, color="k", ls=":", lw=1, label="5% Breakthrough threshold")
+ax1.set_title("Sensitivity to Inlet Velocity (Romulus)")
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("Outlet N2 mole fraction [-]")
+ax1.set_xlim(0, 2000)
+ax1.set_ylim(0, 1.05)
+ax1.legend(fontsize=8)
+ax1.grid(True, ls=":", alpha=0.6)
+
+# Subplot 2: Effect of column length L
+L_labels = [f"0.5 L ({0.5*L:.2f} m)", f"1.0 L ({L:.2f} m)", f"2.0 L ({2.0*L:.2f} m)"]
+L_colors = ["tab:purple", "tab:blue", "tab:red"]
+
+for L_val, lbl, col in zip(L_cases, L_labels, L_colors):
+    t_L, yB_L, _, _, t5_L = L_results[L_val]
+    ax2.plot(t_L, yB_L, color=col, lw=2, label=f"{lbl} (t5% = {t5_L:.1f} s)")
+
+ax2.axhline(0.05, color="k", ls=":", lw=1, label="5% Breakthrough threshold")
+ax2.set_title("Sensitivity to Column Length (Romulus)")
+ax2.set_xlabel("Time [s]")
+ax2.set_xlim(0, 2000)
+ax2.legend(fontsize=8)
+ax2.grid(True, ls=":", alpha=0.6)
+
+plt.tight_layout()
+plt.savefig("sensitivity_results.png", dpi=250, bbox_inches="tight")
+plt.show()
