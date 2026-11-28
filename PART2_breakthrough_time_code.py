@@ -21,9 +21,6 @@ T = 303.0       # K (process temperature)
 P = 100.0 * 1e3 # Pa (process pressure)
 u_in = 4.864e-3 # m/s (inlet velocity, superficial(?))
 
-# Interstitial inlet velocity, v
-v_in = u_in / epsilon # m/s
-
 # Part 1, we use pressure in bar
 P_bar = P / 1e5
 
@@ -33,9 +30,6 @@ ads = (R * T / P) * rho_s * (1.0 - epsilon) / epsilon
 # Constant in equation Glueckauf (LDF : Linear Driving Force) = 15De/rp^2
 D_e = D_m / tau                 # m^2/s (effective pore diffusivity)
 k_i = (15.0 * D_e) / (r_p ** 2) # 1/s
-
-# Axial dispersion coefficient (equation 2)
-D_L = 0.7 * D_m + v_in * r_p
 
 # Number of grid cells along the column
 N_cells = 50
@@ -79,9 +73,15 @@ def multicomponent_Langmuir_Freundlich(P_A, P_B, a):
 # (1) : dy/dt = D_L * d2y/dz2 - d(y*v)/dz - ads * dq/dt // gas balance for N2
 
 # function for breakthrough time (method of lines ; discretization)
-def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 250):
+def run_breakthrough_sim(adsorbent_name, Nz = N_cells, t_end = 1100.0, n_time = 250, L_sim=L,u_sim=u_in):
     a = adsorbent_parameters[adsorbent_name]
-    delta_z = L / Nz # small length for discretization
+    delta_z = L_sim / Nz # small length for discretization
+
+    # Interstitial inlet velocity, v
+    v_in = u_sim / epsilon # m/s 
+
+    # Axial dispersion coefficient (equation 2)
+    D_L = 0.7 * D_m + v_in * r_p
 
     # Initial condition: column saturated with pure O2 (A) : y_B = 0, y_A = 1
     y_B_0 = np.zeros(Nz)
@@ -156,7 +156,7 @@ t_Ro, yB_Ro, yA_Ro, teq_Ro, t5_Ro = run_breakthrough_sim("Romulus", t_end=1100.0
 t_Re, yB_Re, yA_Re, teq_Re, t5_Re = run_breakthrough_sim("Remus", t_end=1100.0)
 
 # Print breakthrough time using equilibrium theory and 5% N2 at outlet
-print("Variable\tRemus\t\tRomulus")
+print("Variable\t     Remus\t\tRomulus")
 print("-----------------------------------------------")
 print(f"Equilibrium time\t{teq_Re:.1f} s\t\t{teq_Ro:.1f} s")
 print(f"5% N2 breakthrough\t{t5_Re:.1f} s\t\t{t5_Ro:.1f} s")
